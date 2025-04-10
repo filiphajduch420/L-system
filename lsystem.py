@@ -1,5 +1,6 @@
 import math
 import matplotlib.pyplot as plt
+import os
 
 def generate_lsystem(axiom, rules, iterations):
     """Generuje řetězec L-systému po zadaném počtu iterací."""
@@ -12,79 +13,71 @@ def generate_lsystem(axiom, rules, iterations):
         result = next_result
     return result
 
-def draw_lsystem(instructions, angle_deg):
-    """Interpretuje instrukce L-systému pomocí jednoduché turtle grafiky."""
-    # Počáteční souřadnice a úhel
+def draw_lsystem(instructions, angle_deg, rules, iterations, output_dir, identifier):
+    """Draws the L-system and saves the image with a specific identifier."""
+    # Initial coordinates and angle
     x, y = 0.0, 0.0
     angle = 0.0
 
-    # Zásobník pro ukládání stavu
+    # Stack for saving state
     stack = []
 
-    # Seznam čar pro vykreslení
+    # List of lines to draw
     lines = []
 
-    # Definice znaků pro různé akce
-    draw = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"  # Kreslení
-    move = "abcdefghijklmnopqrstuvwxyz"           # Pohyb bez kreslení
-    ignore = "VWXvwxYZyz"                         # Ignorované znaky
+    # Character definitions for actions
+    draw = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"  # Drawing
+    move = "abcdefghijklmnopqrstuvwxyz"           # Move without drawing
+    ignore = "VWXvwxYZyz"                         # Ignored characters
 
     for cmd in instructions:
         match cmd:
-            # Nakresli úsečku
             case c if c in draw:
                 x_new = x + math.cos(math.radians(angle))
                 y_new = y + math.sin(math.radians(angle))
                 lines.append(((x, y), (x_new, y_new)))
                 x, y = x_new, y_new
-
-            # Pohni se vpřed bez kreslení
             case c if c in move:
                 x += math.cos(math.radians(angle))
                 y += math.sin(math.radians(angle))
-
-            # Nedělej nic
             case c if c in ignore:
                 pass
-
-            # Otoč se doleva
             case "+":
                 angle += angle_deg
-
-            # Otoč se doprava
             case "-":
                 angle -= angle_deg
-
-            # Otoč se čelem vzad
             case "|":
                 angle += 180
-
-            # Ulož stav
             case "[":
                 stack.append((x, y, angle))
-
-            # Obnov stav
             case "]":
                 x, y, angle = stack.pop()
-
-            # Výchozí – ignoruj neznámé znaky
             case _:
                 pass
 
-    # Vykresli všechny čáry
+    # Plot all lines
     for (x1, y1), (x2, y2) in lines:
         plt.plot([x1, x2], [y1, y2], color="black")
 
-    # Nastavení os a zobrazení grafu
+    # Add rules, angle, and iterations as text in the bottom-right corner
+    rules_text = "\n".join([f"{key} → {value}" for key, value in rules.items()])
+    info_text = f"Rules:\n{rules_text}\n\nAngle: {angle_deg}°\nIterations: {iterations}"
+    plt.gcf().text(0.95, 0.05, info_text, ha="right", va="bottom", fontsize=8)
+
+    # Configure axes and save the plot as an image
     plt.axis("equal")
     plt.axis("off")
-    plt.show()
+    os.makedirs(output_dir, exist_ok=True)
+    image_path = os.path.join(output_dir, f"{identifier}_iteration_{iterations}.png")
+    plt.savefig(image_path, bbox_inches="tight", pad_inches=0.1)
+    plt.close()
 
-def process_lsystem(axiom, rules, angle, iterations):
-    """Generuje a vykresluje L-systém."""
+def process_lsystem(axiom, rules, angle, iterations, identifier):
+    """Generates and saves the L-system images with a specific identifier."""
+    output_dir = "img"
     for i in range(iterations + 1):
-        # Generování aktuálního řetězce L-systému
+        # Generate the current L-system string
         current = generate_lsystem(axiom, rules, i)
-        print(f"Iterace {i}: {current}")
-        # Vykreslení aktuálního stavu L-systému
-        draw_lsystem(current, angle)
+        print(f"Iteration {i}: {current}")
+        # Save the current L-system drawing as an image
+        draw_lsystem(current, angle, rules, i, output_dir, identifier)
