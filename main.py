@@ -36,3 +36,19 @@ if __name__ == "__main__":
     identifier_dragon = "dragon_curve"
     lsystem.Lsystem(axiom_dragon, rules_dragon, angle_dragon, iterations_dragon, identifier_dragon)
     gifmaker.create_gif_from_images("img", f"gif/{identifier_dragon}.gif", identifier_dragon, duration=500)
+
+    # Define the L-System for "FILIP"
+    axiom_filip = "FILIP"
+    rules_filip = {
+        "F": "F+F",
+        "I": "I-I",
+        "L": "L+L",
+        "P": "P-F"
+    }
+    angle_filip = 30
+    iterations_filip = 11
+    identifier_filip = "filip_lsystem"
+
+    # Generate and draw the L-System
+    lsystem.Lsystem(axiom_filip, rules_filip, angle_filip, iterations_filip, identifier_filip)
+    gifmaker.create_gif_from_images("img", f"gif/{identifier_filip}.gif", identifier_filip, duration=500)
