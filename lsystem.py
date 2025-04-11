@@ -4,96 +4,96 @@ import os
 
 def generate_lsystem(axiom, rules, iterations):
     """
-    Generates the L-system string after a specified number of iterations.
+    Generuje řetězec L-systému po stanoveném počtu iterací.
 
     Args:
-        axiom (str): The initial string of the L-system.
-        rules (dict): A dictionary of production rules for the L-system.
-        iterations (int): The number of iterations to apply the rules.
+        axiom (str): Počáteční řetězec L-systému.
+        rules (dict): Slovník produkčních pravidel pro L-systém.
+        iterations (int): Počet iterací pro aplikaci pravidel.
 
     Returns:
-        str: The resulting L-system string after the specified iterations.
+        str: Výsledný řetězec L-systému po určených iteracích.
     """
     result = axiom
     for _ in range(iterations):
         next_result = ""
         for symbol in result:
-            # Replace the symbol based on the rules or keep it unchanged
+            # Nahrazení symbolu podle pravidel nebo ponechání beze změny
             next_result += rules.get(symbol, symbol)
         result = next_result
     return result
 
 def draw_lsystem(instructions, angle_deg, rules, iterations, output_dir, identifier):
     """
-    Draws the L-system based on the generated instructions and saves it as an image.
+    Vykreslí L-systém na základě vygenerovaných instrukcí a uloží jej jako obrázek.
 
     Args:
-        instructions (str): The L-system string to be interpreted for drawing.
-        angle_deg (float): The angle in degrees for turning.
-        rules (dict): The production rules of the L-system.
-        iterations (int): The current iteration of the L-system.
-        output_dir (str): The directory where the image will be saved.
-        identifier (str): A unique identifier for naming the image file.
+        instructions (str): Řetězec L-systému, který bude interpretován pro kreslení.
+        angle_deg (float): Úhel ve stupních pro otáčení.
+        rules (dict): Produkční pravidla L-systému.
+        iterations (int): Aktuální iterace L-systému.
+        output_dir (str): Adresář, kam bude obrázek uložen.
+        identifier (str): Jedinečný identifikátor pro pojmenování souboru obrázku.
     """
-    # Initial coordinates and angle
+    # Počáteční souřadnice a úhel
     x, y = 0.0, 0.0
     angle = 0.0
 
-    # Stack for saving the state (position and angle)
+    # Zásobník pro ukládání stavu (pozice a úhlu)
     stack = []
 
-    # List of lines to draw
+    # Seznam čar pro kreslení
     lines = []
 
-    # Character definitions for actions
-    draw = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"  # Characters for drawing
-    move = "abcdefghijklmnopqrstuvwxyz"           # Characters for moving without drawing
-    ignore = "VWXvwxYZyz"                         # Characters to ignore
+    # Definice znaků pro akce
+    draw = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"  # Znaky pro kreslení
+    move = "abcdefghijklmnopqrstuvwxyz"           # Znaky pro přesun bez kreslení
+    ignore = "VWXvwxYZyz"                         # Znaky k ignorování
 
     for cmd in instructions:
         match cmd:
             case c if c in draw:
-                # Draw a line in the current direction
+                # Nakreslení čáry v aktuálním směru
                 x_new = x + math.cos(math.radians(angle))
                 y_new = y + math.sin(math.radians(angle))
                 lines.append(((x, y), (x_new, y_new)))
                 x, y = x_new, y_new
             case c if c in move:
-                # Move without drawing
+                # Přesun bez kreslení
                 x += math.cos(math.radians(angle))
                 y += math.sin(math.radians(angle))
             case c if c in ignore:
-                # Ignore the command
+                # Ignorování příkazu
                 pass
             case "+":
-                # Turn left by the specified angle
+                # Otočení doleva o určený úhel
                 angle += angle_deg
             case "-":
-                # Turn right by the specified angle
+                # Otočení doprava o určený úhel
                 angle -= angle_deg
             case "|":
-                # Reverse direction (180-degree turn)
+                # Otočení o 180 stupňů
                 angle += 180
             case "[":
-                # Save the current state
+                # Uložení aktuálního stavu
                 stack.append((x, y, angle))
             case "]":
-                # Restore the last saved state
+                # Obnovení posledního uloženého stavu
                 x, y, angle = stack.pop()
             case _:
-                # Ignore unrecognized commands
+                # Ignorování nerozpoznaných příkazů
                 pass
 
-    # Plot all lines
+    # Vykreslení všech čar
     for (x1, y1), (x2, y2) in lines:
         plt.plot([x1, x2], [y1, y2], color="black")
 
-    # Add rules, angle, and iterations as text in the bottom-right corner
+    # Přidání pravidel, úhlu a iterací jako text v pravém dolním rohu
     rules_text = "\n".join([f"{key} → {value}" for key, value in rules.items()])
-    info_text = f"Rules:\n{rules_text}\n\nAngle: {angle_deg}°\nIterations: {iterations}"
+    info_text = f"Pravidla:\n{rules_text}\n\nÚhel: {angle_deg}°\nIterace: {iterations}"
     plt.gcf().text(0.95, 0.05, info_text, ha="right", va="bottom", fontsize=8)
 
-    # Configure axes and save the plot as an image
+    # Konfigurace os a uložení diagramu jako obrázku
     plt.axis("equal")
     plt.axis("off")
     os.makedirs(output_dir, exist_ok=True)
@@ -103,53 +103,53 @@ def draw_lsystem(instructions, angle_deg, rules, iterations, output_dir, identif
 
 def Lsystem(axiom, rules, angle, iterations, identifier):
     """
-    Generates and saves images for each iteration of the L-system.
+    Generuje a ukládá obrázky pro každou iteraci L-systému.
 
     Args:
-        axiom (str): The initial string of the L-system.
-        rules (dict): A dictionary of production rules for the L-system.
-        angle (float): The angle in degrees for turning.
-        iterations (int): The number of iterations to generate.
-        identifier (str): A unique identifier for naming the images.
+        axiom (str): Počáteční řetězec L-systému.
+        rules (dict): Slovník produkčních pravidel pro L-systém.
+        angle (float): Úhel ve stupních pro otáčení.
+        iterations (int): Počet iterací k vygenerování.
+        identifier (str): Jedinečný identifikátor pro pojmenování obrázků.
     """
     output_dir = "img"
     for i in range(iterations + 1):
-        # Generate the current L-system string
+        # Generování aktuálního řetězce L-systému
         current = generate_lsystem(axiom, rules, i)
-        print(f"Iteration {i}: {current}")
-        # Save the current L-system drawing as an image
+        print(f"Iterace {i}: {current}")
+        # Uložení aktuálního vykreslení L-systému jako obrázku
         draw_lsystem(current, angle, rules, i, output_dir, identifier)
 
 
 
 
-# 3D L-System
+# 3D L-Systém
 def draw_lsystem_3d(instructions, angle_deg, rules, iterations, output_dir, identifier):
     """
-    Draws the 3D L-system based on the generated instructions and saves it as an image.
+    Vykreslí 3D L-systém na základě vygenerovaných instrukcí a uloží jej jako obrázek.
 
     Args:
-        instructions (str): The L-system string to be interpreted for drawing.
-        angle_deg (float): The angle in degrees for turning.
-        rules (dict): The production rules of the L-system.
-        iterations (int): The current iteration of the L-system.
-        output_dir (str): The directory where the image will be saved.
-        identifier (str): A unique identifier for naming the image file.
+        instructions (str): Řetězec L-systému, který bude interpretován pro kreslení.
+        angle_deg (float): Úhel ve stupních pro otáčení.
+        rules (dict): Produkční pravidla L-systému.
+        iterations (int): Aktuální iterace L-systému.
+        output_dir (str): Adresář, kam bude obrázek uložen.
+        identifier (str): Jedinečný identifikátor pro pojmenování souboru obrázku.
     """
-    # Initial coordinates and angles
+    # Počáteční souřadnice a úhly
     x, y, z = 0.0, 0.0, 0.0
     yaw, pitch, roll = 0.0, 0.0, 0.0
 
-    # Stack for saving the state (position and orientation)
+    # Zásobník pro ukládání stavu (pozice a orientace)
     stack = []
 
-    # List of lines to draw
+    # Seznam čar pro kreslení
     lines = []
 
     for cmd in instructions:
         match cmd:
             case "F":
-                # Move forward and draw a line
+                # Pohyb vpřed a kreslení čáry
                 dx = math.cos(math.radians(yaw)) * math.cos(math.radians(pitch))
                 dy = math.sin(math.radians(yaw)) * math.cos(math.radians(pitch))
                 dz = math.sin(math.radians(pitch))
@@ -157,37 +157,37 @@ def draw_lsystem_3d(instructions, angle_deg, rules, iterations, output_dir, iden
                 lines.append(((x, y, z), (x_new, y_new, z_new)))
                 x, y, z = x_new, y_new, z_new
             case "+":
-                # Turn left (yaw)
+                # Otočení doleva (yaw)
                 yaw += angle_deg
             case "-":
-                # Turn right (yaw)
+                # Otočení doprava (yaw)
                 yaw -= angle_deg
             case "&":
-                # Pitch down
+                # Naklonění dolů (pitch)
                 pitch += angle_deg
             case "^":
-                # Pitch up
+                # Naklonění nahoru (pitch)
                 pitch -= angle_deg
             case "\\":
-                # Roll left
+                # Náklon doleva (roll)
                 roll += angle_deg
             case "/":
-                # Roll right
+                # Náklon doprava (roll)
                 roll -= angle_deg
             case "[":
-                # Save the current state
+                # Uložení aktuálního stavu
                 stack.append((x, y, z, yaw, pitch, roll))
             case "]":
-                # Restore the last saved state
+                # Obnovení posledního uloženého stavu
                 x, y, z, yaw, pitch, roll = stack.pop()
 
-    # Plot all lines in 3D
+    # Vykreslení všech čar ve 3D
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
     for (x1, y1, z1), (x2, y2, z2) in lines:
         ax.plot([x1, x2], [y1, y2], [z1, z2], color="black")
 
-    # Configure axes and save the plot as an image
+    # Konfigurace os a uložení diagramu jako obrázku
     ax.axis("off")
     os.makedirs(output_dir, exist_ok=True)
     image_path = os.path.join(output_dir, f"{identifier}_iteration_{iterations}.png")
@@ -196,21 +196,21 @@ def draw_lsystem_3d(instructions, angle_deg, rules, iterations, output_dir, iden
 
     model_path = os.path.join(output_dir, f"{identifier}_iteration_{iterations}.obj")
     save_lsystem_3d_model(lines, model_path)
-    print(f"3D model saved to {model_path}")
+    print(f"3D model uložen do {model_path}")
 
 def save_lsystem_3d_model(lines, output_file):
     """
-    Saves the 3D L-system as a 3D model in .obj format.
+    Ukládá 3D L-systém jako 3D model ve formátu .obj.
 
     Args:
-        lines (list): A list of line segments, where each segment is a tuple of two points ((x1, y1, z1), (x2, y2, z2)).
-        output_file (str): The path to save the .obj file.
+        lines (list): Seznam úseček, kde každá úsečka je dvojice bodů ((x1, y1, z1), (x2, y2, z2)).
+        output_file (str): Cesta pro uložení souboru .obj.
     """
     vertices = []
     edges = []
     vertex_index = {}
 
-    # Collect unique vertices and assign indices
+    # Sběr jedinečných vrcholů a přiřazení indexů
     for (x1, y1, z1), (x2, y2, z2) in lines:
         for point in [(x1, y1, z1), (x2, y2, z2)]:
             if point not in vertex_index:
@@ -218,29 +218,29 @@ def save_lsystem_3d_model(lines, output_file):
                 vertices.append(point)
         edges.append((vertex_index[(x1, y1, z1)], vertex_index[(x2, y2, z2)]))
 
-    # Write to .obj file
+    # Zápis do souboru .obj
     with open(output_file, "w") as f:
-        # Write vertices
+        # Zápis vrcholů
         for x, y, z in vertices:
             f.write(f"v {x} {y} {z}\n")
-        # Write edges as lines
+        # Zápis hran jako čar
         for v1, v2 in edges:
             f.write(f"l {v1} {v2}\n")
 
 def Lsystem3D(axiom, rules, angle, iterations, identifier):
     """
-    Generates and saves the final 3D image and model for the L-system.
+    Generuje a ukládá konečný 3D obrázek a model pro L-systém.
 
     Args:
-        axiom (str): The initial string of the L-system.
-        rules (dict): A dictionary of production rules for the L-system.
-        angle (float): The angle in degrees for turning.
-        iterations (int): The number of iterations to generate.
-        identifier (str): A unique identifier for naming the final image and model.
+        axiom (str): Počáteční řetězec L-systému.
+        rules (dict): Slovník produkčních pravidel pro L-systém.
+        angle (float): Úhel ve stupních pro otáčení.
+        iterations (int): Počet iterací k vygenerování.
+        identifier (str): Jedinečný identifikátor pro pojmenování konečného obrázku a modelu.
     """
     output_dir = "img"
-    # Generate the final L-system string
+    # Generování konečného řetězce L-systému
     final = generate_lsystem(axiom, rules, iterations)
-    print(f"Final Iteration {iterations}: {final}")
-    # Save only the final L-system drawing as a 3D image and model
+    print(f"Konečná iterace {iterations}: {final}")
+    # Uložení pouze konečného vykreslení L-systému jako 3D obrázku a modelu
     draw_lsystem_3d(final, angle, rules, iterations, output_dir, identifier)
