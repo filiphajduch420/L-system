@@ -119,3 +119,128 @@ def Lsystem(axiom, rules, angle, iterations, identifier):
         print(f"Iteration {i}: {current}")
         # Save the current L-system drawing as an image
         draw_lsystem(current, angle, rules, i, output_dir, identifier)
+
+
+
+
+# 3D L-System
+def draw_lsystem_3d(instructions, angle_deg, rules, iterations, output_dir, identifier):
+    """
+    Draws the 3D L-system based on the generated instructions and saves it as an image.
+
+    Args:
+        instructions (str): The L-system string to be interpreted for drawing.
+        angle_deg (float): The angle in degrees for turning.
+        rules (dict): The production rules of the L-system.
+        iterations (int): The current iteration of the L-system.
+        output_dir (str): The directory where the image will be saved.
+        identifier (str): A unique identifier for naming the image file.
+    """
+    # Initial coordinates and angles
+    x, y, z = 0.0, 0.0, 0.0
+    yaw, pitch, roll = 0.0, 0.0, 0.0
+
+    # Stack for saving the state (position and orientation)
+    stack = []
+
+    # List of lines to draw
+    lines = []
+
+    for cmd in instructions:
+        match cmd:
+            case "F":
+                # Move forward and draw a line
+                dx = math.cos(math.radians(yaw)) * math.cos(math.radians(pitch))
+                dy = math.sin(math.radians(yaw)) * math.cos(math.radians(pitch))
+                dz = math.sin(math.radians(pitch))
+                x_new, y_new, z_new = x + dx, y + dy, z + dz
+                lines.append(((x, y, z), (x_new, y_new, z_new)))
+                x, y, z = x_new, y_new, z_new
+            case "+":
+                # Turn left (yaw)
+                yaw += angle_deg
+            case "-":
+                # Turn right (yaw)
+                yaw -= angle_deg
+            case "&":
+                # Pitch down
+                pitch += angle_deg
+            case "^":
+                # Pitch up
+                pitch -= angle_deg
+            case "\\":
+                # Roll left
+                roll += angle_deg
+            case "/":
+                # Roll right
+                roll -= angle_deg
+            case "[":
+                # Save the current state
+                stack.append((x, y, z, yaw, pitch, roll))
+            case "]":
+                # Restore the last saved state
+                x, y, z, yaw, pitch, roll = stack.pop()
+
+    # Plot all lines in 3D
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    for (x1, y1, z1), (x2, y2, z2) in lines:
+        ax.plot([x1, x2], [y1, y2], [z1, z2], color="black")
+
+    # Configure axes and save the plot as an image
+    ax.axis("off")
+    os.makedirs(output_dir, exist_ok=True)
+    image_path = os.path.join(output_dir, f"{identifier}_iteration_{iterations}.png")
+    plt.savefig(image_path, bbox_inches="tight", pad_inches=0.1)
+    plt.close()
+
+    model_path = os.path.join(output_dir, f"{identifier}_iteration_{iterations}.obj")
+    save_lsystem_3d_model(lines, model_path)
+    print(f"3D model saved to {model_path}")
+
+def save_lsystem_3d_model(lines, output_file):
+    """
+    Saves the 3D L-system as a 3D model in .obj format.
+
+    Args:
+        lines (list): A list of line segments, where each segment is a tuple of two points ((x1, y1, z1), (x2, y2, z2)).
+        output_file (str): The path to save the .obj file.
+    """
+    vertices = []
+    edges = []
+    vertex_index = {}
+
+    # Collect unique vertices and assign indices
+    for (x1, y1, z1), (x2, y2, z2) in lines:
+        for point in [(x1, y1, z1), (x2, y2, z2)]:
+            if point not in vertex_index:
+                vertex_index[point] = len(vertices) + 1
+                vertices.append(point)
+        edges.append((vertex_index[(x1, y1, z1)], vertex_index[(x2, y2, z2)]))
+
+    # Write to .obj file
+    with open(output_file, "w") as f:
+        # Write vertices
+        for x, y, z in vertices:
+            f.write(f"v {x} {y} {z}\n")
+        # Write edges as lines
+        for v1, v2 in edges:
+            f.write(f"l {v1} {v2}\n")
+
+def Lsystem3D(axiom, rules, angle, iterations, identifier):
+    """
+    Generates and saves the final 3D image and model for the L-system.
+
+    Args:
+        axiom (str): The initial string of the L-system.
+        rules (dict): A dictionary of production rules for the L-system.
+        angle (float): The angle in degrees for turning.
+        iterations (int): The number of iterations to generate.
+        identifier (str): A unique identifier for naming the final image and model.
+    """
+    output_dir = "img"
+    # Generate the final L-system string
+    final = generate_lsystem(axiom, rules, iterations)
+    print(f"Final Iteration {iterations}: {final}")
+    # Save only the final L-system drawing as a 3D image and model
+    draw_lsystem_3d(final, angle, rules, iterations, output_dir, identifier)

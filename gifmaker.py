@@ -1,5 +1,7 @@
 import os
 from PIL import Image
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 def create_gif_from_images(input_dir, output_gif, identifier, duration=500):
     """
@@ -30,3 +32,5 @@ def create_gif_from_images(input_dir, output_gif, identifier, duration=500):
     # Create and save the GIF
     if images:
         images[0].save(output_gif, save_all=True, append_images=images[1:], duration=duration, loop=0)
+
+

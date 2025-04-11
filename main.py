@@ -48,7 +48,18 @@ if __name__ == "__main__":
     angle_filip = 30
     iterations_filip = 11
     identifier_filip = "filip_lsystem"
-
-    # Generate and draw the L-System
     lsystem.Lsystem(axiom_filip, rules_filip, angle_filip, iterations_filip, identifier_filip)
     gifmaker.create_gif_from_images("img", f"gif/{identifier_filip}.gif", identifier_filip, duration=500)
+
+    # Define the L-System for "3D L-System"
+    # 3D Tree Example
+    axiom_tree = "F"
+    rules_tree = {
+        "F": "F[+F][-F]&F^F"
+    }
+    angle_tree = 25  # Angle for branching
+    iterations_tree = 5  # Number of iterations
+    identifier_tree = "3d_tree"
+
+    # Generate and save the 3D tree
+    lsystem.Lsystem3D(axiom_tree, rules_tree, angle_tree, iterations_tree, identifier_tree)
